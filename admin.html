@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anaya's Collection - Admin Panel</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #fff0f5;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .panel {
+      width: 100%;
+      max-width: 420px;
+      background: white;
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px #00000012;
+      text-align: center;
+    }
+    h1 { color: #c2185b; margin-bottom: 8px; }
+    p { color: #777; }
+    input {
+      width: 100%;
+      padding: 13px;
+      margin: 15px 0;
+      border: 1px solid #ddd;
+      border-radius: 7px;
+      font-size: 16px;
+    }
+    button {
+      width: 100%;
+      padding: 13px;
+      background: #c2185b;
+      color: white;
+      border: 0;
+      border-radius: 7px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover { background: #a3154d; }
+    #message { margin-top: 15px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>Anaya's Collection</h1>
+    <p>Admin Login Panel</p>
+
+    <form id="loginForm">
+      <input
+        type="password"
+        id="password"
+        placeholder="Enter Admin Password"
+        required
+      >
+      <button type="submit" id="loginButton">Login</button>
+    </form>
+
+    <div id="message"></div>
+  </div>
+
+  <script>
+    const API_URL = "https://anaya-admin-api.anayacollection75.workers.dev";
+
+    document.getElementById("loginForm").addEventListener("submit", async function(event) {
+      event.preventDefault();
+
+      const password = document.getElementById("password").value;
+      const message = document.getElementById("message");
+      const button = document.getElementById("loginButton");
+
+      button.disabled = true;
+      button.textContent = "Please wait...";
+      message.textContent = "";
+
+      try {
+        const response = await fetch(API_URL + "/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          sessionStorage.setItem("anayaAdminToken", result.token);
+          message.style.color = "green";
+          message.textContent = "Login successful!";
+        } else {
+          message.style.color = "red";
+          message.textContent = result.message || "Login failed.";
+        }
+      } catch (error) {
+        message.style.color = "red";
+        message.textContent = "Connection error. Please try again.";
+      }
+
+      button.disabled = false;
+      button.textContent = "Login";
+    });
+  </script>
+</body>
+</html>
