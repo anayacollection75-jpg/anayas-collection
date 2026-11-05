@@ -67,7 +67,18 @@
 
     <div id="message"></div>
   </div>
+  <div id="dashboard" style="display:none; padding:25px; text-align:center;">
+    <h2>Welcome to Anaya's Collection</h2>
+    <h3>Admin Dashboard</h3>
 
+    <button>Add Collection</button>
+    <button>Add Product</button>
+    <button>Manage Products</button>
+    <button>Manage Collections</button>
+
+    <br><br>
+    <button onclick="location.reload()">Logout</button>
+  </div>
   <script>
     const API_URL = "https://anaya-admin-api.anayacollection75.workers.dev";
 
@@ -95,6 +106,9 @@
           sessionStorage.setItem("anayaAdminToken", result.token);
           message.style.color = "green";
           message.textContent = "Login successful!";
+          document.getElementById("loginForm").style.display = "none";
+document.getElementById("message").style.display = "none";
+document.getElementById("dashboard").style.display = "block";
         } else {
           message.style.color = "red";
           message.textContent = result.message || "Login failed.";
