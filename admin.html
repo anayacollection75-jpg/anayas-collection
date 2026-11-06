@@ -104,6 +104,41 @@
   </div>
   <script>
     const API_URL = "https://anaya-admin-api.anayacollection75.workers.dev";
+    document.getElementById("saveCollectionButton").addEventListener("click", async function() {
+  const name = document.getElementById("collectionName").value.trim();
+  const description = document.getElementById("collectionDescription").value.trim();
+  const message = document.getElementById("collectionMessage");
+  const token = sessionStorage.getItem("anayaAdminToken");
+
+  if (!name) {
+    message.style.color = "red";
+    message.textContent = "Please enter collection name.";
+    return;
+  }
+
+  try {
+    const response = await fetch(API_URL + "/api/collections", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({ name, description })
+    });
+
+    const result = await response.json();
+    message.style.color = result.success ? "green" : "red";
+    message.textContent = result.message || "Something went wrong.";
+
+    if (result.success) {
+      document.getElementById("collectionName").value = "";
+      document.getElementById("collectionDescription").value = "";
+    }
+  } catch (error) {
+    message.style.color = "red";
+    message.textContent = "Connection error. Please try again.";
+  }
+});
 document.getElementById("addCollectionButton").addEventListener("click", function() {
   document.getElementById("collectionForm").style.display = "block";
 });
