@@ -72,7 +72,30 @@
     <h3>Admin Dashboard</h3>
 
     <button type="button" id="addCollectionButton">Add Collection</button>
-    <button>Add Product</button>
+   <div id="collectionForm" style="display:none; margin:20px auto; max-width:400px; background:#fff0f5; padding:20px; border-radius:10px;">
+
+  <h3>Add New Collection</h3>
+
+  <input
+    type="text"
+    id="collectionName"
+    placeholder="Collection Name"
+    required
+  >
+
+  <input
+    type="text"
+    id="collectionDescription"
+    placeholder="Collection Description"
+  >
+
+  <button type="button" id="saveCollectionButton">
+    Save Collection
+  </button>
+
+  <p id="collectionMessage"></p>
+
+</div>
     <button>Manage Products</button>
     <button>Manage Collections</button>
 
