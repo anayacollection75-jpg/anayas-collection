@@ -96,6 +96,34 @@
   <p id="collectionMessage"></p>
 
 </div>
+    <button type="button" id="addProductButton">
+  Add New Product
+</button>
+    <div id="productForm" style="display:none; max-width:500px; margin:20px auto; background:#fff0f5; padding:20px; border-radius:10px;">
+
+  <h3>Add New Product</h3>
+
+  <select id="newProductCollection" required>
+    <option value="">Select Collection</option>
+  </select>
+
+  <input type="text" id="newProductArticle" placeholder="Article Number" required>
+
+  <input type="text" id="newProductName" placeholder="Product Name" required>
+
+  <textarea id="newProductDescription" placeholder="Product Description"></textarea>
+
+  <input type="number" id="newProductCOD" placeholder="COD Price" required>
+
+  <input type="number" id="newProductAdvance" placeholder="Advance Price" required>
+
+  <button type="button" id="saveNewProductButton">Save Product</button>
+
+  <button type="button" id="cancelNewProductButton">Cancel</button>
+
+  <p id="newProductMessage"></p>
+
+</div>
     <button type="button" id="manageProductsButton">
   Manage Products
 </button>
@@ -107,6 +135,47 @@
   </div>
   <script>
     const API_URL = "https://anaya-admin-api.anayacollection75.workers.dev";
+    // Add New Product Form
+document.getElementById("addProductButton").addEventListener("click", async function() {
+  const form = document.getElementById("productForm");
+  const select = document.getElementById("newProductCollection");
+  const token = sessionStorage.getItem("anayaAdminToken");
+
+  form.style.display = "block";
+  select.innerHTML = '<option value="">Loading collections...</option>';
+
+  try {
+    const response = await fetch(API_URL + "/api/collections", {
+      method: "GET",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      select.innerHTML = '<option value="">Unable to load collections</option>';
+      return;
+    }
+
+    select.innerHTML = '<option value="">Select Collection</option>';
+
+    result.collections.forEach(function(collection) {
+      const option = document.createElement("option");
+      option.value = collection.id;
+      option.textContent = collection.name;
+      select.appendChild(option);
+    });
+
+  } catch (error) {
+    select.innerHTML = '<option value="">Connection error</option>';
+  }
+});
+
+document.getElementById("cancelNewProductButton").addEventListener("click", function() {
+  document.getElementById("productForm").style.display = "none";
+});
     document.getElementById("manageProductsButton").addEventListener("click", async function() {
   const list = document.getElementById("productsList");
   const token = sessionStorage.getItem("anayaAdminToken");
