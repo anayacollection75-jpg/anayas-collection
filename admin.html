@@ -145,9 +145,58 @@
       const description = document.createElement("p");
       description.textContent = collection.description || "";
 
-      item.appendChild(name);
-      item.appendChild(description);
-      list.appendChild(item);
+     item.appendChild(name);
+item.appendChild(description);
+
+const editButton = document.createElement("button");
+editButton.textContent = "Edit";
+
+editButton.addEventListener("click", function() {
+  const editName = document.createElement("input");
+  editName.value = collection.name;
+  editName.placeholder = "Collection Name";
+
+  const editDescription = document.createElement("input");
+  editDescription.value = collection.description || "";
+  editDescription.placeholder = "Collection Description";
+
+  const saveButton = document.createElement("button");
+  saveButton.textContent = "Save Changes";
+
+  item.appendChild(editName);
+  item.appendChild(editDescription);
+  item.appendChild(saveButton);
+
+  saveButton.addEventListener("click", async function() {
+    const token = sessionStorage.getItem("anayaAdminToken");
+
+    try {
+      const response = await fetch(API_URL + "/api/collections/" + collection.id, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({
+          name: editName.value.trim(),
+          description: editDescription.value.trim()
+        })
+      });
+
+      const result = await response.json();
+      alert(result.message);
+
+      if (result.success) {
+        document.getElementById("manageCollectionsButton").click();
+      }
+    } catch (error) {
+      alert("Connection error. Please try again.");
+    }
+  });
+});
+
+item.appendChild(editButton);
+list.appendChild(item);
     });
 
   } catch (error) {
