@@ -129,26 +129,88 @@
 
     list.innerHTML = "<h2>All Products (" + data.products.length + ")</h2>";
 
-    data.products.forEach(product => {
-      const item = document.createElement("div");
-      item.style.cssText = "background:#fff0f5; padding:15px; margin:12px 0; border-radius:10px;";
+   data.products.forEach(product => {
+  const item = document.createElement("div");
+  item.style.cssText = "background:#fff0f5; padding:15px; margin:12px 0; border-radius:10px;";
 
-      const title = document.createElement("h3");
-      title.textContent = product.name + " (" + product.article_number + ")";
+  const title = document.createElement("h3");
+  title.textContent = product.name + " (" + product.article_number + ")";
 
-      const collection = document.createElement("p");
-      collection.textContent = "Collection: " + product.collection_name;
+  const collection = document.createElement("p");
+  collection.textContent = "Collection: " + product.collection_name;
 
-      const price = document.createElement("p");
-      price.textContent = "COD: Rs. " + product.cod_price + " | Advance: Rs. " + product.advance_price;
+  const price = document.createElement("p");
+  price.textContent = "COD: Rs. " + product.cod_price + " | Advance: Rs. " + product.advance_price;
 
-      const images = document.createElement("p");
-      images.textContent = "Total Images: " + product.images.length;
+  const images = document.createElement("p");
+  images.textContent = "Total Images: " + product.images.length;
 
-      item.append(title, collection, price, images);
-      list.appendChild(item);
-    });
+  const editButton = document.createElement("button");
+  editButton.textContent = "Edit Product";
 
+  editButton.onclick = async function() {
+    const article = prompt("Article Number:", product.article_number);
+    if (article === null) return;
+
+    const name = prompt("Product Name:", product.name);
+    if (name === null) return;
+
+    const description = prompt("Product Description:", product.description || "");
+    if (description === null) return;
+
+    const cod = prompt("COD Price:", product.cod_price);
+    if (cod === null) return;
+
+    const advance = prompt("Advance Price:", product.advance_price);
+    if (advance === null) return;
+
+    if (
+      !article.trim() ||
+      !name.trim() ||
+      cod.trim() === "" ||
+      advance.trim() === "" ||
+      !Number.isFinite(Number(cod)) ||
+      !Number.isFinite(Number(advance))
+    ) {
+      alert("Please enter valid product details and prices.");
+      return;
+    }
+
+    try {
+      const response = await fetch(API_URL + "/api/products/" + product.id, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + sessionStorage.getItem("anayaAdminToken")
+        },
+        body: JSON.stringify({
+          collection_id: product.collection_id,
+          article_number: article.trim(),
+          name: name.trim(),
+          description: description,
+          cod_price: Number(cod),
+          advance_price: Number(advance),
+          is_active: product.is_active
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert("Product updated successfully!");
+        document.getElementById("manageProductsButton").click();
+      } else {
+        alert(result.message || "Update failed");
+      }
+
+    } catch (error) {
+      alert("Error: " + error.message);
+    }
+  };
+
+  item.append(title, collection, price, images, editButton);
+  list.appendChild(item);
+});
   } catch (error) {
     list.textContent = "Error: " + error.message;
   }
