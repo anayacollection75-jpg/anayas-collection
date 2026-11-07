@@ -286,7 +286,13 @@ document.getElementById("saveNewProductButton").addEventListener("click", async 
 
     if (result.success) {
       alert("Product added successfully!");
-      document.getElementById("productForm").reset();
+      document.getElementById("newProductCollection").value = "";
+document.getElementById("newProductArticle").value = "";
+document.getElementById("newProductName").value = "";
+document.getElementById("newProductDescription").value = "";
+document.getElementById("newProductImages").value = "";
+document.getElementById("newProductCOD").value = "";
+document.getElementById("newProductAdvance").value = "";
       document.getElementById("productForm").style.display = "none";
       message.textContent = "";
       document.getElementById("manageProductsButton").click();
