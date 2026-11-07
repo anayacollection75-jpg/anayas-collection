@@ -147,6 +147,39 @@
 
   const editButton = document.createElement("button");
   editButton.textContent = "Edit Product";
+     const deleteButton = document.createElement("button");
+deleteButton.textContent = "Delete Product";
+deleteButton.style.background = "#dc3545";
+deleteButton.style.color = "white";
+deleteButton.style.marginLeft = "10px";
+
+deleteButton.onclick = async function() {
+  const confirmDelete = confirm(
+    "Are you sure you want to delete " + product.article_number + "?"
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+    const response = await fetch(API_URL + "/api/products/" + product.id, {
+      method: "DELETE",
+      headers: {
+        "Authorization": "Bearer " + sessionStorage.getItem("anayaAdminToken")
+      }
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      alert("Product deleted successfully!");
+      document.getElementById("manageProductsButton").click();
+    } else {
+      alert(result.message || "Delete failed");
+    }
+  } catch (error) {
+    alert("Error: " + error.message);
+  }
+};
 
   editButton.onclick = async function() {
     const article = prompt("Article Number:", product.article_number);
@@ -208,7 +241,7 @@
     }
   };
 
-  item.append(title, collection, price, images, editButton);
+  item.append(title, collection, price, images, editButton, deleteButton);
   list.appendChild(item);
 });
   } catch (error) {
