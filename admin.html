@@ -96,7 +96,9 @@
   <p id="collectionMessage"></p>
 
 </div>
-    <button>Manage Products</button>
+    <button type="button" id="manageProductsButton">
+  Manage Products
+</button>
     <button type="button" id="manageCollectionsButton">Manage Collections</button>
 <div id="collectionsList" style="max-width:500px; margin:20px auto; text-align:left;"></div>
     <br><br>
@@ -104,6 +106,52 @@
   </div>
   <script>
     const API_URL = "https://anaya-admin-api.anayacollection75.workers.dev";
+    document.getElementById("manageProductsButton").addEventListener("click", async function() {
+  const list = document.getElementById("productsList");
+  const token = sessionStorage.getItem("anayaAdminToken");
+
+  list.innerHTML = "Loading Products...";
+
+  try {
+    const response = await fetch(API_URL + "/api/products", {
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const data = await response.json();
+
+    if (!data.success) {
+      list.textContent = data.message || "Products could not be loaded";
+      return;
+    }
+
+    list.innerHTML = "<h2>All Products (" + data.products.length + ")</h2>";
+
+    data.products.forEach(product => {
+      const item = document.createElement("div");
+      item.style.cssText = "background:#fff0f5; padding:15px; margin:12px 0; border-radius:10px;";
+
+      const title = document.createElement("h3");
+      title.textContent = product.name + " (" + product.article_number + ")";
+
+      const collection = document.createElement("p");
+      collection.textContent = "Collection: " + product.collection_name;
+
+      const price = document.createElement("p");
+      price.textContent = "COD: Rs. " + product.cod_price + " | Advance: Rs. " + product.advance_price;
+
+      const images = document.createElement("p");
+      images.textContent = "Total Images: " + product.images.length;
+
+      item.append(title, collection, price, images);
+      list.appendChild(item);
+    });
+
+  } catch (error) {
+    list.textContent = "Error: " + error.message;
+  }
+});
     document.getElementById("manageCollectionsButton").addEventListener("click", async function() {
   const list = document.getElementById("collectionsList");
   const token = sessionStorage.getItem("anayaAdminToken");
