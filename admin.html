@@ -172,7 +172,54 @@ document.getElementById("addProductButton").addEventListener("click", async func
     select.innerHTML = '<option value="">Connection error</option>';
   }
 });
+// Save New Product
+document.getElementById("saveNewProductButton").addEventListener("click", async function() {
+  const token = sessionStorage.getItem("anayaAdminToken");
+  const message = document.getElementById("newProductMessage");
 
+  const product = {
+    collection_id: document.getElementById("newProductCollection").value,
+    article_number: document.getElementById("newProductArticle").value.trim(),
+    name: document.getElementById("newProductName").value.trim(),
+    description: document.getElementById("newProductDescription").value.trim(),
+    cod_price: document.getElementById("newProductCOD").value,
+    advance_price: document.getElementById("newProductAdvance").value
+  };
+
+  if (!product.collection_id || !product.article_number || !product.name ||
+      product.cod_price === "" || product.advance_price === "") {
+    message.textContent = "Please fill all required fields.";
+    return;
+  }
+
+  message.textContent = "Saving product...";
+
+  try {
+    const response = await fetch(API_URL + "/api/products", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify(product)
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      alert("Product added successfully!");
+      document.getElementById("productForm").reset();
+      document.getElementById("productForm").style.display = "none";
+      message.textContent = "";
+      document.getElementById("manageProductsButton").click();
+    } else {
+      message.textContent = result.message || "Unable to save product.";
+    }
+
+  } catch (error) {
+    message.textContent = "Connection error. Please try again.";
+  }
+});
 document.getElementById("cancelNewProductButton").addEventListener("click", function() {
   document.getElementById("productForm").style.display = "none";
 });
