@@ -104,6 +104,56 @@
   </div>
   <script>
     const API_URL = "https://anaya-admin-api.anayacollection75.workers.dev";
+    document.getElementById("manageCollectionsButton").addEventListener("click", async function() {
+  const list = document.getElementById("collectionsList");
+  const token = sessionStorage.getItem("anayaAdminToken");
+
+  list.textContent = "Loading collections...";
+
+  try {
+    const response = await fetch(API_URL + "/api/collections", {
+      method: "GET",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      list.textContent = result.message || "Unable to load collections.";
+      return;
+    }
+
+    list.innerHTML = "";
+
+    if (result.collections.length === 0) {
+      list.textContent = "No collections found.";
+      return;
+    }
+
+    result.collections.forEach(function(collection) {
+      const item = document.createElement("div");
+      item.style.background = "white";
+      item.style.padding = "12px";
+      item.style.margin = "10px 0";
+      item.style.borderRadius = "8px";
+
+      const name = document.createElement("strong");
+      name.textContent = collection.name;
+
+      const description = document.createElement("p");
+      description.textContent = collection.description || "";
+
+      item.appendChild(name);
+      item.appendChild(description);
+      list.appendChild(item);
+    });
+
+  } catch (error) {
+    list.textContent = "Connection error. Please try again.";
+  }
+});
     document.getElementById("saveCollectionButton").addEventListener("click", async function() {
   const name = document.getElementById("collectionName").value.trim();
   const description = document.getElementById("collectionDescription").value.trim();
