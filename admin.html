@@ -167,9 +167,87 @@ document.getElementById("addProductButton").addEventListener("click", async func
       option.textContent = collection.name;
       select.appendChild(option);
     });
-
+const createOption = document.createElement("option");
+createOption.value = "__create__";
+createOption.textContent = "➕ Create New Collection";
+select.appendChild(createOption);
   } catch (error) {
     select.innerHTML = '<option value="">Connection error</option>';
+  }
+});
+    // Create New Collection from Product Form
+document.getElementById("newProductCollection").addEventListener("change", async function() {
+
+  if (this.value !== "__create__") return;
+
+  const select = this;
+  const name = prompt("Enter New Collection Name:");
+
+  if (!name || !name.trim()) {
+    select.value = "";
+    return;
+  }
+
+  const description = prompt("Enter Collection Description:") || "";
+  const token = sessionStorage.getItem("anayaAdminToken");
+
+  try {
+    const response = await fetch(API_URL + "/api/collections", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify({
+        name: name.trim(),
+        description: description.trim()
+      })
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      alert(result.message || "Unable to create collection.");
+      select.value = "";
+      return;
+    }
+
+    const refreshResponse = await fetch(API_URL + "/api/collections", {
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const refreshed = await refreshResponse.json();
+
+    if (refreshed.success) {
+      select.innerHTML = '<option value="">Select Collection</option>';
+
+      refreshed.collections.forEach(function(collection) {
+        const option = document.createElement("option");
+        option.value = collection.id;
+        option.textContent = collection.name;
+        select.appendChild(option);
+      });
+
+      const newCollection = refreshed.collections.find(
+        collection => collection.name.trim().toLowerCase() === name.trim().toLowerCase()
+      );
+
+      if (newCollection) {
+        const createOption = document.createElement("option");
+        createOption.value = "__create__";
+        createOption.textContent = "➕ Create New Collection";
+        select.appendChild(createOption);
+
+        select.value = String(newCollection.id);
+        alert("New Collection created and selected!");
+      }
+    }
+
+  } catch (error) {
+    alert("Connection error. Please try again.");
+    select.value = "";
   }
 });
 // Save New Product
@@ -216,10 +294,11 @@ document.getElementById("saveNewProductButton").addEventListener("click", async 
       message.textContent = result.message || "Unable to save product.";
     }
 
-  } catch (error) {
+   } catch (error) {
     message.textContent = "Connection error. Please try again.";
   }
 });
+
 document.getElementById("cancelNewProductButton").addEventListener("click", function() {
   document.getElementById("productForm").style.display = "none";
 });
