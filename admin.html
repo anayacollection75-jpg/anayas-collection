@@ -105,24 +105,29 @@
 
   <select id="newProductCollection" required>
     <option value="">Select Collection</option>
-  </select>
+</select>
+<input type="text" id="newProductArticle" placeholder="Article Number" required>
 
-  <input type="text" id="newProductArticle" placeholder="Article Number" required>
+<input type="text" id="newProductName" placeholder="Product Name" required>
 
-  <input type="text" id="newProductName" placeholder="Product Name" required>
+<textarea id="newProductDescription" placeholder="Product Description"></textarea>
 
-  <textarea id="newProductDescription" placeholder="Product Description"></textarea>
+<textarea
+  id="newProductImages"
+  placeholder="Product Image Paths (one image path per line)"
+  rows="4"
+></textarea>
 
-  <input type="number" id="newProductCOD" placeholder="COD Price" required>
+<input type="number" id="newProductCOD" placeholder="COD Price" required>
 
-  <input type="number" id="newProductAdvance" placeholder="Advance Price" required>
+<input type="number" id="newProductAdvance" placeholder="Advance Price" required>
 
-  <button type="button" id="saveNewProductButton">Save Product</button>
+<button type="button" id="saveNewProductButton">Save Product</button>
 
-  <button type="button" id="cancelNewProductButton">Cancel</button>
+<button type="button" id="cancelNewProductButton">Cancel</button>
 
-  <p id="newProductMessage"></p>
-
+<p id="newProductMessage"></p>
+   
 </div>
     <button type="button" id="manageProductsButton">
   Manage Products
