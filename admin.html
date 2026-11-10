@@ -111,8 +111,18 @@
 <input type="text" id="newProductName" placeholder="Product Name" required>
 
 <textarea id="newProductDescription" placeholder="Product Description"></textarea>
+<label for="newProductFiles">Select Product Photos:</label>
 
+<input
+  type="file"
+  id="newProductFiles"
+  accept="image/jpeg,image/png,image/webp,image/gif"
+  multiple
+>
+
+<p>Maximum image size: 4 MB per image.</p>
 <textarea
+  
   id="newProductImages"
   placeholder="Product Image Paths (one image path per line)"
   rows="4"
@@ -278,6 +288,37 @@ document.getElementById("saveNewProductButton").addEventListener("click", async 
   message.textContent = "Saving product...";
 
   try {
+    const manualImages = document.getElementById("newProductImages").value
+      .split(/\r?\n/)
+      .map(path => path.trim())
+      .filter(path => path);
+
+    const selectedFiles = document.getElementById("newProductFiles").files;
+    const uploadedImages = [];
+
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const formData = new FormData();
+      formData.append("file", selectedFiles[i]);
+
+      const uploadResponse = await fetch(API_URL + "/api/upload-image", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + token
+        },
+        body: formData
+      });
+
+      const uploadResult = await uploadResponse.json();
+
+      if (!uploadResponse.ok || !uploadResult.success) {
+        throw new Error(uploadResult.message || "Image upload failed");
+      }
+
+      uploadedImages.push(uploadResult.image_url);
+    }
+
+    product.images = [...manualImages, ...uploadedImages];
+
     const response = await fetch(API_URL + "/api/products", {
       method: "POST",
       headers: {
@@ -292,12 +333,13 @@ document.getElementById("saveNewProductButton").addEventListener("click", async 
     if (result.success) {
       alert("Product added successfully!");
       document.getElementById("newProductCollection").value = "";
-document.getElementById("newProductArticle").value = "";
-document.getElementById("newProductName").value = "";
-document.getElementById("newProductDescription").value = "";
-document.getElementById("newProductImages").value = "";
-document.getElementById("newProductCOD").value = "";
-document.getElementById("newProductAdvance").value = "";
+      document.getElementById("newProductArticle").value = "";
+      document.getElementById("newProductName").value = "";
+      document.getElementById("newProductDescription").value = "";
+      document.getElementById("newProductImages").value = "";
+      document.getElementById("newProductFiles").value = "";
+      document.getElementById("newProductCOD").value = "";
+      document.getElementById("newProductAdvance").value = "";
       document.getElementById("productForm").style.display = "none";
       message.textContent = "";
       document.getElementById("manageProductsButton").click();
@@ -305,11 +347,10 @@ document.getElementById("newProductAdvance").value = "";
       message.textContent = result.message || "Unable to save product.";
     }
 
-   } catch (error) {
-    message.textContent = "Connection error. Please try again.";
+  } catch (error) {
+    message.textContent = error.message || "Connection error. Please try again.";
   }
 });
-
 document.getElementById("cancelNewProductButton").addEventListener("click", function() {
   document.getElementById("productForm").style.display = "none";
 });
