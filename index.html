@@ -471,7 +471,13 @@ Elegant Charizma Chiffon / Net Dresses
 </div>
 
 </section>
+<!-- DATABASE COLLECTIONS -->
 
+<section class="section" id="databaseCollections" style="display:none;">
+
+<div id="databaseCollectionsList"></div>
+
+</section>
 <!-- ABOUT -->
 
 <section class="about" id="about">
@@ -678,52 +684,210 @@ Order ${articleNumber} on WhatsApp
 binSaadContainer.innerHTML = binSaadHTML;
 
 
+// LOAD PRODUCTS FROM DATABASE
+
+async function loadDatabaseProducts() {
+
+  try {
+
+    const response = await fetch(
+      "https://anaya-admin-api.anayacollection75.workers.dev/api/public/products"
+    );
+
+    const data = await response.json();
+
+    if (!data.success || !Array.isArray(data.products)) {
+      throw new Error("Products could not be loaded");
+    }
+
+    const collections = new Map();
+
+    data.products.forEach(product => {
+
+      const collectionName =
+        (product.collection_name || "Other Collection").trim();
+
+      if (!collections.has(product.collection_id)) {
+        collections.set(product.collection_id, {
+          name: collectionName,
+          products: []
+        });
+      }
+
+      collections.get(product.collection_id).products.push(product);
+
+    });
+
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    let collectionsHTML = "";
+
+    collections.forEach(collection => {
+
+      let productsHTML = "";
+
+      collection.products.forEach(product => {
+
+        const imagesHTML = (product.images || []).map(image => {
+
+          const imageURL = new URL(
+            image.image_url,
+            window.location.origin
+          ).href;
+
+          return `
+            <img
+              src="${escapeHTML(imageURL)}"
+              alt="${escapeHTML(product.name)}"
+              loading="lazy"
+              style="cursor:zoom-in;"
+            >
+          `;
+
+        }).join("");
+
+        const productName =
+          product.name || product.article_number || "Dress";
+
+        const description =
+          escapeHTML(product.description || "").replace(/\n/g, "<br>");
+
+        const price =
+          product.cod_price + " (Cash on Delivery) / " +
+          product.advance_price + " (Advance Payment)";
+
+        productsHTML += `
+          <div class="product"
+            data-name="${escapeHTML(productName + " " + product.article_number)}">
+
+            <div class="product-gallery">
+              ${imagesHTML}
+            </div>
+
+            <div class="details">
+
+              <span class="article-number">
+                Article: ${escapeHTML(product.article_number)}
+              </span>
+
+              <h3>${escapeHTML(productName)}</h3>
+
+              <p>${description}</p>
+
+              <div class="price">
+                Cash on Delivery: Rs. ${escapeHTML(product.cod_price)}<br>
+                Advance Payment: Rs. ${escapeHTML(product.advance_price)}
+              </div>
+
+              <a class="order"
+                href="#"
+                data-product-name="${escapeHTML(productName)}"
+                data-product-price="${escapeHTML(price)}">
+                Order on WhatsApp
+              </a>
+
+            </div>
+          </div>
+        `;
+
+      });
+
+      collectionsHTML += `
+        <div class="database-collection">
+
+          <h2>${escapeHTML(collection.name)}</h2>
+
+          <div class="products">
+            ${productsHTML}
+          </div>
+
+        </div>
+      `;
+
+    });
+
+    document.getElementById("databaseCollectionsList").innerHTML =
+      collectionsHTML;
+
+    // Hide old hardcoded products only after successful loading
+
+    document.getElementById("productList").style.display = "none";
+
+    document.getElementById("binSaadSection").style.display = "none";
+
+    document.getElementById("databaseCollections").style.display = "block";
+
+    // WhatsApp ordering for database products
+
+    document.querySelectorAll(
+      "#databaseCollections .order"
+    ).forEach(button => {
+
+      button.addEventListener("click", function(event) {
+
+        event.preventDefault();
+
+        orderProduct(
+          this.dataset.productName,
+          this.dataset.productPrice
+        );
+
+      });
+
+    });
+
+    console.log("Database products loaded successfully");
+
+  } catch (error) {
+
+    console.error("Database loading error:", error);
+
+  }
+
+}
+
+loadDatabaseProducts();
+
+
 // SEARCH ALL PRODUCTS
 
 function searchProducts(){
 
-const query =
-document.getElementById('search').value.toLowerCase().trim();
+  const query =
+    document.getElementById('search').value.toLowerCase().trim();
 
-const products =
-document.querySelectorAll('.product');
+  const products =
+    document.querySelectorAll('#databaseCollections .product');
 
-let count = 0;
-let binCount = 0;
+  let count = 0;
 
-products.forEach(product => {
+  products.forEach(product => {
 
-const searchableText =
-(
-product.dataset.name + " " +
-product.textContent
-).toLowerCase();
+    const searchableText =
+      (product.dataset.name + " " + product.textContent).toLowerCase();
 
-const match = searchableText.includes(query);
+    const match = searchableText.includes(query);
 
-product.style.display = match ? '' : 'none';
+    product.style.display = match ? '' : 'none';
 
-if(match){
+    if(match){
+      count++;
+    }
 
-count++;
+  });
 
-if(product.closest('#binSaadProducts')){
-binCount++;
-}
+  document.getElementById('noResults').style.display =
+    count ? 'none' : 'block';
 
 }
-
-});
-
-document.getElementById('noResults').style.display =
-count ? 'none' : 'block';
-
-document.getElementById('binSaadSection').style.display =
-(query && binCount === 0) ? 'none' : '';
-
-}
-
-
 // IMAGE LIGHTBOX
 
 function openLightbox(imageSrc){
