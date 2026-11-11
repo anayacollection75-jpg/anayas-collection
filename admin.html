@@ -390,6 +390,16 @@ document.getElementById("cancelNewProductButton").addEventListener("click", func
   price.textContent = "COD: Rs. " + product.cod_price + " | Advance: Rs. " + product.advance_price;
 
   const images = document.createElement("p");
+     product.images.forEach(function(photo) {
+  const img = document.createElement("img");
+  img.src = photo.image_url;
+  img.style.width = "120px";
+  img.style.height = "120px";
+  img.style.objectFit = "cover";
+  img.style.margin = "5px";
+  img.style.borderRadius = "8px";
+  item.appendChild(img);
+});
   images.textContent = "Total Images: " + product.images.length;
 
   const editButton = document.createElement("button");
